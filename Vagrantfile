@@ -10,7 +10,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # please see the online documentation at vagrantup.com.
 
   # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.box = "base"
+  # You can choose a box by visiting https://vagrantcloud.com/
+  # config.vm.box = "hashicorp/precise32"
+  config.vm.box = "ubuntu/trusty64"
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -21,6 +23,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
   # config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.network "forwarded_port", guest: 5000, host: 5000
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
@@ -119,4 +122,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # chef-validator, unless you changed the configuration.
   #
   #   chef.validation_client_name = "ORGNAME-validator"
+
+  # See https://docs.vagrantup.com/v2/provisioning/salt.html on how to privision using Salt
+  config.vm.synced_folder "salt/roots/", "/srv/salt/"
+  config.vm.provision :salt do |salt|
+    salt.minion_config = "salt/minion.conf"
+    salt.run_highstate = true
+    salt.colorize = true
+    salt.verbose = true
+    salt.log_level = "debug"
+  end
 end
