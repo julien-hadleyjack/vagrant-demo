@@ -1,7 +1,7 @@
 
-********************************************************************
-Creating repreducable development environments with Vagrant and Salt
-********************************************************************
+*************************************
+Repreducable development environments
+*************************************
 
 ####################
 What will be covered
