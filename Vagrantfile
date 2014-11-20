@@ -23,7 +23,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
   # config.vm.network "forwarded_port", guest: 80, host: 8080
-  config.vm.network "forwarded_port", guest: 5000, host: 5000
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
@@ -125,11 +124,42 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # See https://docs.vagrantup.com/v2/provisioning/salt.html on how to privision using Salt
   config.vm.synced_folder "salt/roots/", "/srv/salt/"
-  config.vm.provision :salt do |salt|
-    salt.minion_config = "salt/minion.conf"
-    salt.run_highstate = true
-    salt.colorize = true
-    salt.verbose = true
-    salt.log_level = "debug"
+
+  config.vm.define "dev", primary: true do |dev|
+    config.vm.network "forwarded_port", guest: 5000, host: 5000
+    dev.vm.provision :salt do |salt|
+      salt.minion_config = "salt/minion.conf"
+      salt.run_highstate = true
+      salt.colorize = true
+      salt.verbose = true
+      salt.log_level = "info"
+
+      salt.pillar({
+          "role" => "dev",
+          "flask-variables" => {
+            "port" => "5000",
+            "debug" => true
+      }})
+    end
   end
+
+  config.vm.define "prod", autostart: false do |prod|
+    config.vm.network "forwarded_port", guest: 5000, host: 5001
+    prod.vm.provision :salt do |salt|
+      salt.minion_config = "salt/minion.conf"
+      salt.run_highstate = true
+      salt.colorize = true
+      salt.verbose = true
+      salt.log_level = "debug"
+
+      salt.pillar({
+          "role" => "prod",
+          "flask-variables" => {
+            "port" => "5000",
+            "debug" => false
+      }})
+    end
+  end
+
+  
 end

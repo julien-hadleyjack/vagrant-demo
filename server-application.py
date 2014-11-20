@@ -2,16 +2,24 @@ from datetime import date
 import json
 from flask import Flask
 import requests
-import re
+from flask.ext.cache import Cache
 
 
 app = Flask(__name__)
+app.config.from_object('config')
+
+cache = Cache(app, config={'CACHE_TYPE': 'redis'})
+
 
 @app.route('/')
 @app.route('/meals/day/')
+def meals_today():
+    return meals_day(date.today().isoformat())
+
+
 @app.route('/meals/day/<day>/')
-def meals_day(**day):
-    day = date.today().isoformat() if not day else day["day"]
+@cache.cached(timeout=3600)
+def meals_day(day):
     url = "http://openmensa.org/api/v2/canteens/33/days/{0}/meals".format(day)
     page = requests.get(url)
     meal_filter = lambda meal: {"name": meal["name"], "price": meal["prices"]["students"]}
@@ -19,4 +27,4 @@ def meals_day(**day):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', debug=app.config['DEBUG'], port=app.config['PORT'])

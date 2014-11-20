@@ -1,4 +1,4 @@
 base:
   '*':
-    - requirements
     - flask-app
+    - redis

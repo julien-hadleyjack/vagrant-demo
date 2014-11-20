@@ -7,7 +7,6 @@ Repreducable development environments
 What will be covered
 ####################
 
-fghfghfhsdad
 
 ##########
 The result
