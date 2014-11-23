@@ -125,8 +125,27 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # See https://docs.vagrantup.com/v2/provisioning/salt.html on how to privision using Salt
   config.vm.synced_folder "salt/roots/", "/srv/salt/"
 
+  config.vm.define "prod", autostart: false do |prod|
+  config.vm.network "forwarded_port", guest: 5000, host: 5000
+  prod.vm.provision :salt do |salt|
+    salt.minion_config = "salt/minion.conf"
+    salt.run_highstate = true
+    salt.colorize = true
+    salt.verbose = true
+    salt.log_level = "debug"
+
+    salt.pillar({
+      "role" => "prod",
+      "flask-variables" => {
+        "bind_adress" => "127.0.0.1:5000",
+        "reloader" => false,
+        "debug" => false
+    }})
+  end
+end
+
   config.vm.define "dev", primary: true do |dev|
-    config.vm.network "forwarded_port", guest: 5000, host: 5000
+    config.vm.network "forwarded_port", guest: 5000, host: 5001
     dev.vm.provision :salt do |salt|
       salt.minion_config = "salt/minion.conf"
       salt.run_highstate = true
@@ -137,29 +156,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       salt.pillar({
           "role" => "dev",
           "flask-variables" => {
-            "port" => "5000",
+            "bind_adress" => "0.0.0.0:5000",
+            "reloader" => true,
             "debug" => true
+
       }})
     end
   end
 
-  config.vm.define "prod", autostart: false do |prod|
-    config.vm.network "forwarded_port", guest: 5000, host: 5001
-    prod.vm.provision :salt do |salt|
-      salt.minion_config = "salt/minion.conf"
-      salt.run_highstate = true
-      salt.colorize = true
-      salt.verbose = true
-      salt.log_level = "debug"
 
-      salt.pillar({
-          "role" => "prod",
-          "flask-variables" => {
-            "port" => "5000",
-            "debug" => false
-      }})
-    end
-  end
 
   
 end

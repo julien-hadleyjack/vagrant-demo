@@ -1,7 +1,5 @@
 flask
 flask-cache
 redis
-#beautifulsoup4
-#lxml
 requests
 gunicorn
