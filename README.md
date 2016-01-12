@@ -16,4 +16,4 @@ To run the demo you first need to install [Vagrant](https://www.vagrantup.com/).
 vagrant up
 ```
 
-in the project directory and then you can interact with the running Flask application at http://localhost:5000.
+in the project directory and then you can interact with the running Flask application at <http://localhost:5000>.
